@@ -54,6 +54,11 @@
        replace:
          dest: /tmp/policy_files/keystone_policy.json
          regexp: "token.is_admin_project:True"
+     - name: Replace tenant_id with project_id bug# 1
+       replace:
+         dest: /tmp/policy_files/neutron_policy.json
+         regexp: 'tenant_id:%\(tenant_id\)s'
+         replace: "project_id:%(project_id)s"
 
 - name: Distribute policy files to Horizon containers
   hosts: horizon_all
