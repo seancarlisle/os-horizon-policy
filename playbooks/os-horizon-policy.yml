@@ -18,3 +18,7 @@
   user: root
   roles:
     - os-horizon-policy
+  vars: 
+    - openstack_release: "13.3.5"
+    - openstack_dashboard_dir: "/openstack/venvs/horizon-{{ openstack_release }}/lib/python2.7/site-packages/openstack_dashboard/"
+
