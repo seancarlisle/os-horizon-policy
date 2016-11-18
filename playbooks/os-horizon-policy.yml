@@ -32,6 +32,9 @@
           src: "/etc/{{ item.service }}/policy.json"
           dest: "/tmp/policy_files/{{ item.service }}_policy.json"
           mode: pull
+          owner: yes
+          group: yes
+          perms: yes
        with_items:
           - { host: "{{ groups['keystone_all'][0] }}", dest: "/etc/keystsone/policy.json", service: "keystone" }       
           - { host: "{{ groups['nova_all'][0] }}", dest: "/etc/nova/policy.json", service: "nova" }
@@ -54,23 +57,31 @@
        replace:
          dest: /tmp/policy_files/keystone_policy.json
          regexp: "token.is_admin_project:True"
+     - name: Replace tenant_id with project_id bug# 1
+       replace:
+         dest: /tmp/policy_files/neutron_policy.json
+         regexp: 'tenant_id:%\(tenant_id\)s'
+         replace: "project_id:%(project_id)s"
 
 - name: Distribute policy files to Horizon containers
   hosts: horizon_all
   tasks:
     - name: Distribute policy files to Horizon containers
-      synchronize:
+      copy:
         src: /tmp/policy_files/
-        recursive: yes
         dest: "{{ horizon_lib_dir }}/openstack_dashboard/conf/"
+        owner: horizon
+        group: www-data
+        mode: 0644
     - name: Restart Apache2
       service:
         name: apache2
         state: restarted
+  
         
   vars:
     openstack_ansible_release: "13.3.5"
-    horizon_lib_dir: "/openstack/venvs/horizon-{{ openstack_ansible_release }}/lib/python2.7/site-packages"
+    horizon_lib_dir: "/openstack/venvs/horizon-{{ openstack_ansible_release }}/lib/python2.7/dist-packages"
     horizon_system_user_name: "horizon"
     horizon_system_group_name: "www-data"
 
