@@ -62,6 +62,16 @@
          dest: /tmp/policy_files/neutron_policy.json
          regexp: 'tenant_id:%\(tenant_id\)s'
          replace: "project_id:%(project_id)s"
+     - name: Replace admin_required for issue# 4
+       replace:
+         dest: /tmp/policy_files/keystone_policy.json
+         regexp: '^    "admin_required":.*$'
+         replace: '    "admin_required": "role:cloud-admin or role:admin or role:cloud-support or role:cirt or role:bu-admin",'
+     - name: Replace admin_and_matching_project_id
+       replace:
+         dest: /tmp/policy_files/keystone_policy.json
+         regexp: '^    "admin_and_matching_domain_id":.*$'
+         replace: '    "admin_and_matching_domain_id": "role:cloud-admin or role:admin or (role:bu-admin and domain_id:%(domain_id)s)",'
 
 - name: Distribute policy files to Horizon containers
   hosts: horizon_all
